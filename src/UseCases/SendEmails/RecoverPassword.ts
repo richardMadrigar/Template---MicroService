@@ -1,49 +1,43 @@
-import { IMethodEmail } from '@config/NodeMailer/NodeMailerConfig';
 import { IRepositorySendEmail } from 'Repositories/SendEmail/RepositorySendEmail';
 import { inject, injectable } from 'tsyringe';
 
-import { configsSendEmails } from '@shared/EmailTemplate/ConfigSubjects';
-import { handleGenerateUuid } from '@shared/features/handleGenerateUuid/handleGenerateUuid';
+import { IQueueGet } from '@shared/Providers/Queues/ReceiveQueues/DTO/IQueueReceive';
 import { AppError } from '@shared/Util/AppError/AppError';
 
 interface IRecoverPassword{
-  idRecoverPassword: string;
-  idUser: string;
-  name: string;
-  email: string;
+  // idUser: string;
+  // name: string;
+  // email: string;
   subject: 'RECOVER_PASSWORD';
+  receiptHandle: string
 }
 
 @injectable()
 export class RecoverPassword {
   constructor(
-    @inject('MethodEmail') private MethodEmail: IMethodEmail,
     @inject('RepositorySendEmail') private RepositorySendEmail: IRepositorySendEmail,
+    @inject('QueueGet') private QueueGet: IQueueGet,
   ) {}
 
   async execute({
-    email, idRecoverPassword, idUser, name, subject,
+    subject, receiptHandle,
   }: IRecoverPassword) {
     try {
-      const resultTemplate = configsSendEmails[subject];
-
-      const resultSendEmail = await this.MethodEmail
-        .sendEmail({
-          content: resultTemplate.template({ id: idRecoverPassword }),
-          subject: resultTemplate.subject,
-          to: [email],
-        });
-
-      this.RepositorySendEmail
-        .Create({
-          name,
-          email,
-          idUser,
-          subject,
-          idRecoverPassword,
-          id: handleGenerateUuid(),
-          status: resultSendEmail.status,
-        });
+      // this.RepositorySendEmail
+      //   .Create({
+      //     name,
+      //     email,
+      //     idUser,
+      //     subject,
+      //     idRecoverPassword: '',
+      //     id: handleGenerateUuid(),
+      //     status: 'success',
+      //   });
+      // eslint-disable-next-line no-console
+      console.log(subject);
+      console.log(receiptHandle);
+      // se processou tudo que precisa então remover da fila
+      // await this.QueueGet.Delete(receiptHandle);
     } catch (error: any) {
       throw new AppError(error);
     }

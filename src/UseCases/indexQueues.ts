@@ -1,36 +1,26 @@
 import { container } from 'tsyringe';
 
-import { QueueReceiveEmails } from '@shared/Providers/Queues/ReceiveQueuesEmails/QueueReceiveEmails';
+import { QueueGet } from '@shared/Providers/Queues/ReceiveQueues/QueueReceive';
 
 import { RecoverPassword } from './SendEmails/RecoverPassword';
 
 export class SQSAll {
   private async execute() {
-    const resultQueues = await container.resolve(QueueReceiveEmails).execute();
+    const serviceQueues = container.resolve(QueueGet);
+
+    const resultQueues = await serviceQueues.execute();
+    console.log('resultado da fila', resultQueues);
 
     const promises = resultQueues.map((element) => {
-      if (element?.email) {
-        if (element.subject === 'RECOVER_PASSWORD') {
-          return container.resolve(RecoverPassword)
-            .execute({
-              email: element.email,
-              idRecoverPassword: element.idRecoverPassword,
-              idUser: element.idUser,
-              name: element.name,
-              subject: element.subject,
-            });
-        }
+      if (element.body) {
+        console.log('resultado que existe body', element);
+        container.resolve(RecoverPassword)
+          .execute({
+            subject: 'RECOVER_PASSWORD',
+            receiptHandle: element.receiptHandle,
+          });
 
-      // if ( element.subject === 'RECOVER_PASSWORD') {
-      //   return container.resolve(RecoverPassword)
-      //     .execute({
-      //       email: element.email,
-      //       idRecoverPassword: element.idRecoverPassword,
-      //       idUser: element.idUser,
-      //       name: element.name,
-      //       subject: element.subject,
-      //     });
-      // }
+        return null;
       }
 
       return null;

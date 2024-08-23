@@ -23,19 +23,21 @@ export class SQSService implements ISQSService {
     const params = {
       QueueUrl: queueUrl,
       MaxNumberOfMessages: 10, // Define quantas mensagens consumir por vez
-      WaitTimeSeconds: 20, // Long polling para melhorar a performance
+      WaitTimeSeconds: 5, // Long polling para melhorar a performance
     };
 
     try {
-      const data: ReceiveMessageResult = await this.sqs.receiveMessage(params).promise();
-
+      const resultQueues: ReceiveMessageResult = await this.sqs.receiveMessage(params).promise();
       const messages: ISQSServiceMessageBody[] = [];
 
-      if (data.Messages) {
-        for (const message of data.Messages) {
-          if (message.Body) {
-            messages.push(JSON.parse(message.Body));
-            await this.deleteMessage(queueUrl, message.ReceiptHandle!);
+      if (resultQueues.Messages) {
+        for (const element of resultQueues.Messages) {
+          if (element.Body) {
+            messages.push({
+              body: JSON.parse(element.Body),
+              receiptHandle: element.ReceiptHandle,
+            });
+            // await this.DeleteMessage(queueUrl, element.ReceiptHandle!);
           }
         }
       }
@@ -46,7 +48,7 @@ export class SQSService implements ISQSService {
     }
   }
 
-  private async deleteMessage(queueUrl: string, receiptHandle: string): Promise<void> {
+  async DeleteMessage(queueUrl: string, receiptHandle: string): Promise<void> {
     const params = {
       QueueUrl: queueUrl,
       ReceiptHandle: receiptHandle,

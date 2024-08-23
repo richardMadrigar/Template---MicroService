@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const SchemaQueueGetEmails = z
+export const SchemaQueueGet = z
   .object({
     email: z
       .string({

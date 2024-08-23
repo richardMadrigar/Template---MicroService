@@ -1,8 +1,7 @@
-import { MethodEmail } from '@config/NodeMailer/NodeMailerConfig';
 import { RepositorySendEmail } from 'Repositories/SendEmail/Postgres/RepositorySendEmail';
 import { container } from 'tsyringe';
 
-import { QueueReceiveEmails } from '@shared/Providers/Queues/ReceiveQueuesEmails/QueueReceiveEmails';
+import { QueueGet } from '@shared/Providers/Queues/ReceiveQueues/QueueReceive';
 import { SQSService } from '@shared/Providers/Queues/SQSService';
 
 container.registerSingleton<RepositorySendEmail>(
@@ -15,12 +14,7 @@ container.registerSingleton<SQSService>(
   SQSService,
 );
 
-container.registerSingleton<QueueReceiveEmails>(
-  'QueueReceiveEmails',
-  QueueReceiveEmails,
-);
-
-container.registerSingleton<MethodEmail>(
-  'MethodEmail',
-  MethodEmail,
+container.registerSingleton<QueueGet>(
+  'QueueGet',
+  QueueGet,
 );
